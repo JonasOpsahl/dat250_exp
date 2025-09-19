@@ -8,6 +8,7 @@ public class Vote {
     private Integer voteId;
     private User voter;
     private VoteOption chosenOption;
+    private Integer userId;
 
     
     public Vote() {
@@ -28,6 +29,14 @@ public class Vote {
 
     public Integer getVoteId() {
         return this.voteId;
+    }
+    
+    public void setVoterId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public Integer getVoterId() {
+        return this.userId;
     }
 
     public void setVoter(User voter) {

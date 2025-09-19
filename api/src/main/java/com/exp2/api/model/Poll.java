@@ -28,6 +28,14 @@ public class Poll {
 
     }
 
+    public VoteOption addVoteOption(String caption) {
+        VoteOption newOption = new VoteOption();
+        newOption.setCaption(caption);
+        newOption.setPresentationOrder(this.pollOptions.size());
+        this.pollOptions.add(newOption);
+        return newOption;
+    }
+
     public void setQuestion(String question) {
         this.question = question;
     }

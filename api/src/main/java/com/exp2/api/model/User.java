@@ -1,5 +1,10 @@
 package com.exp2.api.model;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class User {
@@ -8,10 +13,36 @@ public class User {
     private String email;
     private Integer userId;
     private String password;
+    private Set<Poll> created;
     
 
     public User() {
         
+    }
+
+    public User(String username, String email) {
+        this.username = username;
+        this.email = email;
+        this.created = new LinkedHashSet<>();
+    }
+
+    public Poll createPoll(String question) {
+        Poll newPoll = new Poll();
+        newPoll.setQuestion(question);
+        newPoll.setCreatorId(this.userId);
+        this.created.add(newPoll);
+        return newPoll;
+
+    }
+
+    public Vote voteFor(VoteOption option) {
+        Vote newVote = new Vote();
+        newVote.setVoter(this);
+        newVote.setChosenOption(option);
+        newVote.setVoterId(this.userId);
+        newVote.setPublishedAt(Instant.now());
+        return newVote;
+
     }
 
     public void setUsername(String newUsername) {
