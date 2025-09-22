@@ -3,7 +3,7 @@ package com.exp2.api;
 import com.exp2.api.model.Poll;
 import com.exp2.api.model.User;
 import com.exp2.api.model.VoteOption;
-import com.exp2.api.service.PollManager;
+import com.exp2.api.service.InMemoryPollService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,14 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PollAppUnitTests {
 
-    private PollManager pollManager;
+    private InMemoryPollService pollManager;
     private User user1;
     private User user2;
 
     // This method runs before each test, ensuring a clean state
     @BeforeEach
     void setUp() {
-        pollManager = new PollManager();
+        pollManager = new InMemoryPollService();
         user1 = pollManager.createUser("Alice", "alice@example.com", "pass123");
         user2 = pollManager.createUser("Bob", "bob@example.com", "pass456");
     }

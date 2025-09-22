@@ -3,8 +3,10 @@ package com.exp2.api.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.exp2.api.model.Poll;
+import com.exp2.api.model.User;
 import com.exp2.api.model.VoteOption;
-import com.exp2.api.service.PollManager;
+import com.exp2.api.service.InMemoryPollService;
+import com.exp2.api.service.PollService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,19 +28,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/api/polls")
 public class PollController {
     
-    private PollManager pollManager;
+    private PollService pollService;
 
-    public PollController(PollManager pollManager) {
-        this.pollManager = pollManager;
+    public PollController(PollService pollService) {
+        this.pollService = pollService;
     }
 
     @RequestMapping
     public List<Poll> getPolls(@RequestParam(required = false) Optional<Integer> userId) {
-        return pollManager.getPolls(userId);
+        return pollService.getPolls(userId);
     }
     @RequestMapping("/{id}")
     public Poll getPoll(@PathVariable Integer id, @RequestParam Integer userId) {
-        return pollManager.getPoll(id, userId);
+        return pollService.getPoll(id, userId);
     }
 
     @PostMapping
@@ -59,7 +61,7 @@ public class PollController {
             pollOptions.add(option);
         }
 
-        return pollManager.createPoll(
+        return pollService.createPoll(
             question,
             durationDays,
             creatorId,
@@ -76,26 +78,26 @@ public class PollController {
             @RequestParam Integer presentationOrder,
             @RequestParam(required = false) Optional<Integer> userId) {
 
-        return pollManager.castVote(pollId, userId, presentationOrder);
+        return pollService.castVote(pollId, userId, presentationOrder);
     }
 
     @GetMapping("/{id}/results")
     public Map<String, Integer> getPollResults(@PathVariable("id") Integer pollId) {
-        return pollManager.getPollResults(pollId);
+        return pollService.getPollResults(pollId);
     }
 
     @PutMapping("/{id}")
     public Poll updatePoll(@PathVariable Integer id, @RequestParam Optional<Integer> durationDays, @RequestParam Integer userId, @RequestParam(required = false) List<Integer> newInvites) {
         if (newInvites == null) {
             List<Integer> newInvitesEmpty = new ArrayList<>();
-            return pollManager.updatePoll(durationDays, id ,userId, newInvitesEmpty);
+            return pollService.updatePoll(durationDays, id ,userId, newInvitesEmpty);
         }
-        return pollManager.updatePoll(durationDays, id ,userId, newInvites);
+        return pollService.updatePoll(durationDays, id ,userId, newInvites);
     }
 
     @DeleteMapping("/{id}")
     public boolean deletePoll(@PathVariable Integer id) {
-        return pollManager.deletePoll(id);
+        return pollService.deletePoll(id);
     }
 
 }

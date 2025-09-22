@@ -6,13 +6,36 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name="users")
 public class User {
     
+    @Column(unique = true)
     private String username;
+
+    @Column(unique = true)
     private String email;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
+
     private String password;
+
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @JsonIgnore
     private Set<Poll> created;
     
 
@@ -26,10 +49,16 @@ public class User {
         this.created = new LinkedHashSet<>();
     }
 
+    public User(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
+
     public Poll createPoll(String question) {
         Poll newPoll = new Poll();
         newPoll.setQuestion(question);
-        newPoll.setCreatorId(this.userId);
+        newPoll.setCreator(this);
         this.created.add(newPoll);
         return newPoll;
 

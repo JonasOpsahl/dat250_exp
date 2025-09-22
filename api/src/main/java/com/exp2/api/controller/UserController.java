@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.exp2.api.model.User;
-import com.exp2.api.service.PollManager;
+import com.exp2.api.service.InMemoryPollService;
+import com.exp2.api.service.PollService;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,36 +23,36 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api/users")
 public class UserController {
     
-    private PollManager pollManager;
+    private PollService pollService;
 
-    public UserController(PollManager pollManager) {
-        this.pollManager = pollManager;
+    public UserController(PollService pollService) {
+        this.pollService = pollService;
     }
 
     @RequestMapping
     public List<User> getUsers() {
-        return pollManager.getUsers();
+        return pollService.getUsers();
 
     }
 
     @RequestMapping("/{id}")
     public User getUser(@PathVariable Integer id) {
-        return pollManager.getUser(id);
+        return pollService.getUser(id);
     }
 
     @PostMapping
     public User createUser(@RequestParam String username, @RequestParam String email, @RequestParam String password) {
-        return pollManager.createUser(username, email, password);
+        return pollService.createUser(username, email, password);
     }
     
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Integer id, @RequestParam Optional<String> username, @RequestParam Optional<String> email, @RequestParam Optional<String> password) {
-        return pollManager.updateUser(id, username, email, password);
+        return pollService.updateUser(id, username, email, password);
     }
 
     @DeleteMapping("/{id}")
     public boolean deleteUser(@PathVariable Integer id) {
-        return pollManager.deleteUser(id);
+        return pollService.deleteUser(id);
     }
 
 }

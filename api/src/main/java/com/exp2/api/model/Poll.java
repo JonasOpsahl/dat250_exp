@@ -1,22 +1,61 @@
 package com.exp2.api.model;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name="polls")
 public class Poll {
     
     private String question;
     private Instant publishedAt;
     private Integer durationDays;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer pollId;
-    private Integer creatorId;
+
+    @ManyToOne
+    @JoinColumn(name = "creator_id")
+    @JsonBackReference
+    private User creator;
+
     private Instant validUntil;
+
+    @Enumerated(EnumType.STRING)
     private Visibility visibility;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name="poll_invited_users", joinColumns=@JoinColumn(name="poll_id"))
+    @Column(name="user_id")
     private List<Integer> invitedUsers;
     private Integer maxVotesPerUser;
-    private List<VoteOption> pollOptions;
+
+    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<VoteOption> pollOptions = new ArrayList<>();
 
 
     public enum Visibility {
@@ -32,6 +71,7 @@ public class Poll {
         VoteOption newOption = new VoteOption();
         newOption.setCaption(caption);
         newOption.setPresentationOrder(this.pollOptions.size());
+        newOption.setPoll(this);
         this.pollOptions.add(newOption);
         return newOption;
     }
@@ -69,12 +109,12 @@ public class Poll {
         return this.pollId;
     }
 
-    public void setCreatorId(Integer creatorId) {
-        this.creatorId = creatorId;
+    public void setCreator(User creator) {
+        this.creator = creator;
     }
 
-    public Integer getCreatorId() {
-        return this.creatorId;
+    public User getCreator() {
+        return this.creator;
     }
 
     public void setValidUntil(Instant validUntil) {
@@ -115,8 +155,12 @@ public class Poll {
         this.pollOptions = pollOptions; 
     }
 
+    @JsonProperty("pollOptions")
     public List<VoteOption> getPollOptions() { 
         return pollOptions; 
     }
 
+    public Integer getCreatorId() {
+        return creator != null ? creator.getUserId() : null;
+    }
 }

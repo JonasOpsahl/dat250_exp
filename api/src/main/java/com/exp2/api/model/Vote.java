@@ -2,12 +2,37 @@ package com.exp2.api.model;
 
 import java.time.Instant;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "votes")
 public class Vote {
     
     private Instant publishedAt;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer voteId;
+
+    @ManyToOne
+    @JoinColumn(name = "voter_id")
     private User voter;
+
+    @ManyToOne
+    @JoinColumns({
+        @JoinColumn(name = "option_poll_id", referencedColumnName = "poll_id"),
+        @JoinColumn(name = "option_presentation_order", referencedColumnName = "presentationOrder")
+    })
     private VoteOption chosenOption;
+    
     private Integer userId;
 
     

@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.exp2.api.model.Poll;
@@ -18,13 +19,14 @@ import com.exp2.api.model.Vote;
 import com.exp2.api.model.VoteOption;
 
 @Component
-public class PollManager {
+@Profile("in-memory")
+public class InMemoryPollService implements PollService{
     
     private Map<Integer, User> users = new HashMap<>();
     private Map<Integer, Poll> polls = new HashMap<>();
     private Map<Integer, Vote> allVotes = new HashMap<>();
 
-    public PollManager() {
+    public InMemoryPollService() {
 
     }
 
@@ -45,6 +47,7 @@ public class PollManager {
     // Users
 
     // Create
+    @Override
     public User createUser(String username, String email, String password) {
         User newUser = new User();
         newUser.setUsername(username);
@@ -57,16 +60,19 @@ public class PollManager {
     }
 
     // Read
+    @Override
     public List<User> getUsers() {
         return new ArrayList<>(users.values());
     }
 
     // Read
+    @Override
     public User getUser(Integer userId) {
         return users.get(userId);
     }
 
     // Update
+    @Override
     public User updateUser(Integer userId, Optional<String> newUsername, Optional<String> newEmail, Optional<String> newPassword) {
         User toChange = getUser(userId);
         if (newUsername.isPresent()) {
@@ -83,6 +89,7 @@ public class PollManager {
     }
 
     // Delete
+    @Override
     public boolean deleteUser(Integer id) {
         users.remove(id);
         return true;
@@ -91,33 +98,39 @@ public class PollManager {
     // Polls
 
     // Create
-    public Poll createPoll(String question, Integer durationDays, Integer creatorId, Poll.Visibility visibility, 
-                           Optional<Integer> maxVotesPerUser, 
-                           List<Integer> invitedUsers, List<VoteOption> pollOptions) {
-        Poll newPoll = new Poll();
-        if (users.get(creatorId) == null) {
-            return null;
+    @Override
+    public Poll createPoll(String question, Integer durationDays, Integer creatorid, Poll.Visibility visibility, 
+                        Optional<Integer> maxVotesPerUser, 
+                        List<Integer> invitedUsers, List<VoteOption> pollOptions) {
+        
+        User creator = users.get(creatorid);
+        if (creator == null) {
+            throw new IllegalArgumentException("Creator with ID " + creatorid + " not found.");
         }
 
+        Poll newPoll = new Poll();
         newPoll.setVisibility(visibility);
-        if (visibility == Poll.Visibility.PRIVATE) {
-            invitedUsers.add(creatorId);
-            newPoll.setInvitedUsers(invitedUsers.stream().distinct().toList());
-            newPoll.setMaxVotesPerUser(maxVotesPerUser.orElse(1));
-        }
-        else {
-            newPoll.setInvitedUsers(new ArrayList<>(users.keySet()));
-        }
         newPoll.setQuestion(question);
         newPoll.setPublishedAt(Instant.now());
-        Instant validUntil = Instant.now().plus(Duration.ofDays(durationDays));
-        newPoll.setValidUntil(validUntil);
-        newPoll.setCreatorId(creatorId);
+        newPoll.setDurationDays(durationDays);
+        newPoll.setValidUntil(Instant.now().plus(Duration.ofDays(durationDays)));
+        newPoll.setMaxVotesPerUser(maxVotesPerUser.orElse(1));
+        
+        newPoll.setCreator(creator);
 
+        for (VoteOption option : pollOptions) {
+            option.setPoll(newPoll);
+        }
         newPoll.setPollOptions(pollOptions);
 
+        if (visibility == Poll.Visibility.PRIVATE) {
+            invitedUsers.add(creator.getUserId());
+            newPoll.setInvitedUsers(invitedUsers.stream().distinct().toList());
+        } else {
+            newPoll.setInvitedUsers(new ArrayList<>(users.keySet()));
+        }
+        
         Integer pollId = pollIdCreator();
-        newPoll.setDurationDays(durationDays);
         newPoll.setPollId(pollId);
         polls.put(pollId, newPoll);
 
@@ -125,6 +138,7 @@ public class PollManager {
     }
 
     // Read
+    @Override
     public List<Poll> getPolls(Optional<Integer> userId) {
         List<Poll> returnList = new ArrayList<>();
         
@@ -148,6 +162,7 @@ public class PollManager {
     }
 
     // Read
+    @Override
     public Poll getPoll(Integer pollId, Integer userId) {
         Poll poll = polls.get(pollId);
         if (poll.getVisibility() == Poll.Visibility.PUBLIC) {
@@ -162,10 +177,11 @@ public class PollManager {
     }
 
     // Update
+    @Override
     public Poll updatePoll(Optional<Integer> durationDays, Integer pollId, Integer userId, List<Integer> newInvites) {
         Poll toUpdate = getPoll(pollId, userId);
         
-        if (toUpdate == null || !toUpdate.getCreatorId().equals(userId)) {
+        if (toUpdate == null || !toUpdate.getCreator().getUserId().equals(userId)) {
              return null;
         }
 
@@ -191,6 +207,7 @@ public class PollManager {
     }
 
     // Delete
+    @Override
     public boolean deletePoll(Integer pollId) {
         polls.remove(pollId);
         return true;
@@ -200,6 +217,7 @@ public class PollManager {
 
     // Create vote
 
+    @Override
     public boolean castVote(Integer pollId, Optional<Integer> userId, Integer presentationOrder) {
         Poll poll = polls.get(pollId);
 
@@ -254,6 +272,7 @@ public class PollManager {
         return true;
     }
 
+    @Override
     public Map<String, Integer> getPollResults(Integer pollId) {
         Poll poll = polls.get(pollId);
         if (poll == null) {
