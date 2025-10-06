@@ -6,6 +6,7 @@ import com.exp2.api.model.VoteOption;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface PollService {
     User createUser(String username, String email, String password);
@@ -22,6 +23,10 @@ public interface PollService {
     boolean deletePoll(Integer pollId);
     boolean castVote(Integer pollId, Optional<Integer> userId, Integer presentationOrder);
     Map<String, Integer> getPollResults(Integer pollId);
+    void loginUser(Integer userId);
+    void logoutUser(Integer userId);
+    boolean isUserLoggedIn(Integer userId);
+    Set<String> getLoggedInUsers();
 
     
 }

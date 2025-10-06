@@ -1,7 +1,6 @@
 package com.exp2.api.model;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

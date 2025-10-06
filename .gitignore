@@ -8,7 +8,7 @@ dist
 dist-ssr
 *.local
 
-
+dump.rdb
 # IDE files
 .vscode/*
 !.vscode/extensions.json

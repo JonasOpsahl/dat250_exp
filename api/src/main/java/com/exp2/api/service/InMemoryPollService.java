@@ -4,9 +4,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -296,6 +298,25 @@ public class InMemoryPollService implements PollService{
         users.clear();
         polls.clear();
         allVotes.clear();
+    }
+
+    // Not used here but needed from interface
+    @Override
+    public void loginUser(Integer userId) {
+    }
+
+    @Override
+    public void logoutUser(Integer userId) {
+    }
+
+    @Override
+    public boolean isUserLoggedIn(Integer userId) {
+        return false;
+    }
+
+    @Override
+    public Set<String> getLoggedInUsers() {
+        return new HashSet<>();
     }
 
 }

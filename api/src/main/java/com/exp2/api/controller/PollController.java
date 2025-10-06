@@ -3,9 +3,7 @@ package com.exp2.api.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.exp2.api.model.Poll;
-import com.exp2.api.model.User;
 import com.exp2.api.model.VoteOption;
-import com.exp2.api.service.InMemoryPollService;
 import com.exp2.api.service.PollService;
 
 import java.util.ArrayList;

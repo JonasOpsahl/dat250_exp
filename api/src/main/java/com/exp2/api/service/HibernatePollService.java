@@ -4,18 +4,21 @@ import com.exp2.api.model.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Component
+@Service("hibernatePollService")
 @Profile("database")
 public class HibernatePollService implements PollService {
 
@@ -337,5 +340,23 @@ public class HibernatePollService implements PollService {
         } finally {
             em.close();
         }
+    }
+
+    @Override
+    public void loginUser(Integer userId) {
+    }
+
+    @Override
+    public void logoutUser(Integer userId) {
+    }
+
+    @Override
+    public boolean isUserLoggedIn(Integer userId) {
+        return false;
+    }
+
+    @Override
+    public Set<String> getLoggedInUsers() {
+        return new HashSet<>();
     }
 }
