@@ -5,12 +5,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.exp2.api.model.Poll;
 import com.exp2.api.model.VoteOption;
 import com.exp2.api.service.PollService;
+import com.exp2.api.service.ProducerService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 
 @RestController
@@ -27,9 +31,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class PollController {
     
     private PollService pollService;
+    private ProducerService producerService;
 
-    public PollController(PollService pollService) {
+    public PollController(PollService pollService, ProducerService producerService) {
         this.pollService = pollService;
+        this.producerService = producerService; 
     }
 
     @RequestMapping
@@ -71,12 +77,19 @@ public class PollController {
     }
 
     @PostMapping("/{id}/vote")
-    public boolean castVote(
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void castVote(
             @PathVariable("id") Integer pollId,
             @RequestParam Integer presentationOrder,
             @RequestParam(required = false) Optional<Integer> userId) {
 
-        return pollService.castVote(pollId, userId, presentationOrder);
+        // This endpoint now published to Kafka and return immediately, no longer waiting for the database write
+        Map<String, Object> voteData = new HashMap<>();
+        voteData.put("pollId", pollId);
+        voteData.put("presentationOrder", presentationOrder);
+        voteData.put("userId", userId.orElse(null));
+
+        producerService.sendEvent(voteData);
     }
 
     @GetMapping("/{id}/results")

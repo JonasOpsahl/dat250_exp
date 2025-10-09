@@ -23,9 +23,11 @@ import java.util.stream.Stream;
 public class HibernatePollService implements PollService {
 
     private final EntityManagerFactory emf;
+    private final PollTopicManager pollTopicManager;
 
-    public HibernatePollService(EntityManagerFactory emf) {
+    public HibernatePollService(EntityManagerFactory emf, PollTopicManager pollTopicManager) {
         this.emf = emf;
+        this.pollTopicManager = pollTopicManager;
     }
 
     // Users
@@ -150,6 +152,11 @@ public class HibernatePollService implements PollService {
 
             em.persist(newPoll);
             em.getTransaction().commit();
+
+            if (newPoll.getPollId() != null) {
+                pollTopicManager.createPollTopic(newPoll.getPollId());
+            }
+
             return newPoll;
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
