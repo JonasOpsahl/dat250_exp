@@ -31,6 +31,7 @@ dependencies {
 
 	implementation("redis.clients:jedis:6.2.0")
 	implementation("org.springframework.kafka:spring-kafka")
+	implementation("org.apache.kafka:kafka-clients:3.7.0")
 
 }
 
