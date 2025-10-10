@@ -83,7 +83,6 @@ public class PollController {
             @RequestParam Integer presentationOrder,
             @RequestParam(required = false) Optional<Integer> userId) {
 
-        // This endpoint now published to Kafka and return immediately, no longer waiting for the database write
         Map<String, Object> voteData = new HashMap<>();
         voteData.put("pollId", pollId);
         voteData.put("presentationOrder", presentationOrder);
