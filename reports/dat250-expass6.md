@@ -12,7 +12,7 @@ An initial challenge was setting up Apache Kafka on NixOS. Official documentatio
 
 My first consideration was to use Docker for a containerized setup, which would abstract away host system dependencies. But since we are using Docker next week anyway, I figured I would do it another way and installed it natively.
 
-After looking at the NixOS community forums, I found a working configuration that leverages KRaft (Kafka Raft) mode. This approach conveniently eliminates the need for a separate Zookeeper instance, simplifying the overall architecture. The following configuration was added to my NixOS `configuration.nix` to deploy a single-node KRaft cluster:
+After looking at the NixOS community forums, I found a working [configuration](https://discourse.nixos.org/t/how-to-setup-kafka-server-on-nixos/45055) that leverages KRaft mode. This approach conveniently eliminates the need for a separate Zookeeper instance, simplifying the overall architecture. The following configuration was added to my NixOS `configuration.nix` to deploy a single-node KRaft cluster:
 
 ```nix
 services.apache-kafka = {
@@ -47,7 +47,7 @@ This declarative setup ensures that Kafka runs as a systemd service automaticall
 
 After successfully integrating the Kafka producer and consumer, I observed a noticeable processing delay when casting votes. My initial hypothesis was that this latency was caused by a single consumer having to switch between different Kafka topics, as the delay was most obvious when voting on different polls sequentially.
 
-However, this theory was disproven when I realized the same delay occurred when voting for different options within the same poll (which have the same topic). This pointed to a different root cause.
+However, this theory was disproven when I realized the same delay occurred when voting for different options within the same poll (which have the same topic). This pointed to a different cause.
 
 The actual issue stems from the architectural shift from a synchronous to an asynchronous model. And is quite obvious after thinking twice about it. By introducing Kafka, the REST API no longer waits for the database transaction to complete. It hands the message to the broker and immediately returns a success response. This change exposed two underlying challenges:
 
